@@ -9,7 +9,5 @@ const userSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
-
 const userdb = new mongoose.model("users", userSchema);
-
 module.exports = userdb;

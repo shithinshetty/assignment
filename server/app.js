@@ -8,7 +8,7 @@ const session = require("express-session");
 const passport = require("passport");
 const OAuth2Strategy = require("passport-google-oauth20").Strategy;
 const userdb = require("./modals/userschema");
-
+const vendordb = require("./modals/vendordetails");
 const clientid =
   "518813606404-eb17r1hgans4sbdg0pm5mka3obm5oobb.apps.googleusercontent.com";
 const clientsecret = "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";
@@ -104,7 +104,29 @@ app.get("/logout", (req, res, next) => {
     res.redirect("http://localhost:3000");
   });
 });
+// New route to handle form submission and store data in MongoDB
 
+app.post("/dashboard", async (req, res) => {
+  const vendorData = req.body;
+
+  try {
+    // Create a new vendor document
+    const newVendor = new vendordb(vendorData);
+
+    // Save the document to the database
+    const savedVendor = await newVendor.save();
+
+    console.log("Vendor details saved:", savedVendor);
+
+    // Respond to the client with a success message
+    res.status(200).json({ message: "Vendor details saved successfully" });
+  } catch (error) {
+    console.error("Error saving vendor details:", error.message);
+
+    // Respond to the client with an error message
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
 app.listen(PORT, () => {
   console.log(`server start at port no ${PORT}`);
 });
