@@ -32,23 +32,38 @@ const Headers = () => {
       <header>
         <nav>
           <div className="left">
-            <h1>Shithin Shetty</h1>
+            <h1>Vendor Management App</h1>
           </div>
           <div className="right">
             <ul>
               {Object?.keys(userdata)?.length > 0 ? (
                 <>
-                  <li style={{ color: "black", fontWeight: "bold" }}>
+                  <li
+                    style={{
+                      marginRight: "10px",
+                      color: "black",
+                      fontWeight: "bold",
+                    }}
+                  >
                     {userdata?.displayName}
                   </li>
-                  <li>
+                  <li style={{ marginRight: "10px" }}>
                     <NavLink to="/dashboard">Dashboard</NavLink>
                   </li>
-                  <li onClick={logout}>Logout</li>
+                  <li style={{ marginRight: "10px" }} onClick={logout}>
+                    Logout
+                  </li>
+                  <li style={{ marginRight: "10px" }}>
+                    <NavLink to="/vendors">VendorList</NavLink>
+                  </li>
                   <li>
                     <img
                       src={userdata?.image}
-                      style={{ width: "50px", borderRadius: "50%" }}
+                      style={{
+                        width: "50px",
+                        borderRadius: "50%",
+                        marginLeft: "10px",
+                      }}
                       alt=""
                     />
                   </li>

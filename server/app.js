@@ -127,6 +127,18 @@ app.post("/dashboard", async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 });
+//fetch vendor details from db
+
+app.get("/vendors", async (req, res) => {
+  try {
+    const vendors = await vendordb.find({}, { _id: 0, __v: 0 });
+    res.json(vendors);
+  } catch (error) {
+    console.error("Error fetching vendors:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`server start at port no ${PORT}`);
 });
