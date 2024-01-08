@@ -131,11 +131,46 @@ app.post("/dashboard", async (req, res) => {
 
 app.get("/vendors", async (req, res) => {
   try {
-    const vendors = await vendordb.find({}, { _id: 0, __v: 0 });
-    res.json(vendors);
+    const vendors = await vendordb
+      .find({}, { _id: 1, vendorName: 1, bankAccountNo: 1, bankName: 1 })
+      .lean();
+
+    // Map _id to vendorId
+    const vendorsWithVendorId = vendors.map((vendor) => ({
+      ...vendor,
+      vendorId: String(vendor._id), // Convert _id to String and set it as vendorId
+    }));
+
+    res.json(vendorsWithVendorId);
   } catch (error) {
     console.error("Error fetching vendors:", error);
     res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+//Edit Functionality
+app.put("/editvendor/:vendorId", async (req, res) => {
+  try {
+    const vendorId = req.params.vendorId;
+    const updatedVendorData = req.body;
+
+    const updatedVendor = await vendordb.findByIdAndUpdate(
+      vendorId,
+      updatedVendorData,
+      { new: true }
+    );
+
+    if (!updatedVendor) {
+      return res.status(404).json({ error: "Vendor not found" });
+    }
+
+    res
+      .status(200)
+      .json({ message: "Vendor details updated successfully", updatedVendor });
+  } catch (error) {
+    console.error("Error updating vendor details:", error.message);
+
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 

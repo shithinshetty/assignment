@@ -2,10 +2,18 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import ReactPaginate from "react-paginate";
 import "./vendorlist.css";
+
 const VendorList = () => {
   const [vendors, setVendors] = useState([]);
   const [pageNumber, setPageNumber] = useState(0);
-  const vendorsPerPage = 5; // Adjust the number of vendors per page as needed
+  const vendorsPerPage = 5;
+
+  const [editingVendor, setEditingVendor] = useState(null);
+  const [editedVendor, setEditedVendor] = useState({
+    vendorName: "",
+    bankAccountNo: "",
+    bankName: "",
+  });
 
   useEffect(() => {
     const fetchVendors = async () => {
@@ -26,6 +34,42 @@ const VendorList = () => {
 
   const handlePageChange = ({ selected }) => {
     setPageNumber(selected);
+  };
+
+  const handleEditClick = (vendor) => {
+    console.log("Vendor ID being set:", vendor.vendorId);
+    console.log("Vendor object:", vendor);
+    setEditingVendor(vendor);
+    setEditedVendor({
+      vendorName: vendor.vendorName,
+      bankAccountNo: vendor.bankAccountNo,
+      bankName: vendor.bankName,
+    });
+  };
+
+  const handleSubmit = async () => {
+    console.log("Submitting Vendor ID:", editingVendor.vendorId);
+    console.log("Edited Vendor Data:", editedVendor);
+    try {
+      await axios.put(
+        `http://localhost:6005/editvendor/${editingVendor.vendorId}`,
+        editedVendor
+      );
+
+      const updatedVendors = vendors.map((vendor) =>
+        vendor.vendorId === editingVendor.vendorId
+          ? { ...vendor, ...editedVendor }
+          : vendor
+      );
+
+      setVendors(updatedVendors);
+
+      // Reset the editing state
+      setEditingVendor(null);
+      setEditedVendor({});
+    } catch (error) {
+      console.error("Error updating vendor:", error);
+    }
   };
 
   const displayVendors = vendors
@@ -54,6 +98,8 @@ const VendorList = () => {
         <p>
           <strong>Zip Code:</strong> {vendor.zipCode}
         </p>
+        {/* Ensure vendorId is available and passed correctly */}
+        <button onClick={() => handleEditClick(vendor)}>Edit</button>
         <hr />
       </div>
     ));
@@ -77,6 +123,45 @@ const VendorList = () => {
           Next
         </button>
       </div>
+      {editingVendor && (
+        <div>
+          <h3>Edit Vendor</h3>
+          <label>
+            Vendor Name:
+            <input
+              type="text"
+              value={editedVendor.vendorName || ""}
+              onChange={(e) =>
+                setEditedVendor({ ...editedVendor, vendorName: e.target.value })
+              }
+            />
+          </label>
+          <label>
+            Vendor BankAccount No.:
+            <input
+              type="text"
+              value={editedVendor.bankAccountNo || ""}
+              onChange={(e) =>
+                setEditedVendor({
+                  ...editedVendor,
+                  bankAccountNo: e.target.value,
+                })
+              }
+            />
+          </label>
+          <label>
+            Vendor BankName:
+            <input
+              type="text"
+              value={editedVendor.bankName || ""}
+              onChange={(e) =>
+                setEditedVendor({ ...editedVendor, bankName: e.target.value })
+              }
+            />
+          </label>
+          <button onClick={handleSubmit}>Save Changes</button>
+        </div>
+      )}
     </div>
   );
 };
