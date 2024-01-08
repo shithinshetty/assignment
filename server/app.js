@@ -132,7 +132,20 @@ app.post("/dashboard", async (req, res) => {
 app.get("/vendors", async (req, res) => {
   try {
     const vendors = await vendordb
-      .find({}, { _id: 1, vendorName: 1, bankAccountNo: 1, bankName: 1 })
+      .find(
+        {},
+        {
+          _id: 1,
+          vendorName: 1,
+          bankAccountNo: 1,
+          bankName: 1,
+          addressLine1: 1,
+          addressLine2: 1,
+          city: 1,
+          country: 1,
+          zipCode: 1,
+        }
+      )
       .lean();
 
     // Map _id to vendorId
@@ -168,8 +181,26 @@ app.put("/editvendor/:vendorId", async (req, res) => {
       .status(200)
       .json({ message: "Vendor details updated successfully", updatedVendor });
   } catch (error) {
-    console.error("Error updating vendor details:", error.message);
+    console.error("Error updating vendor details:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
 
+//Delete Functionality
+app.delete("/deletevendor/:vendorId", async (req, res) => {
+  try {
+    const vendorId = req.params.vendorId;
+
+    // Use your mongoose model to delete the vendor
+    const deletedVendor = await vendordb.findByIdAndDelete(vendorId);
+
+    if (!deletedVendor) {
+      return res.status(404).json({ error: "Vendor not found" });
+    }
+
+    res.status(200).json({ message: "Vendor deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting vendor:", error.message);
     res.status(500).json({ error: "Internal server error" });
   }
 });

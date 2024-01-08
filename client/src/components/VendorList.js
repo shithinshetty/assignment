@@ -13,6 +13,11 @@ const VendorList = () => {
     vendorName: "",
     bankAccountNo: "",
     bankName: "",
+    addressLine1: "",
+    addressLine2: "",
+    city: "",
+    country: "",
+    zipCode: "",
   });
 
   useEffect(() => {
@@ -37,29 +42,51 @@ const VendorList = () => {
   };
 
   const handleEditClick = (vendor) => {
-    console.log("Vendor ID being set:", vendor.vendorId);
+    console.log("Vendor ID being set:", vendor._id);
     console.log("Vendor object:", vendor);
+
     setEditingVendor(vendor);
+
     setEditedVendor({
-      vendorName: vendor.vendorName,
+      vendorId: vendor._id,
       bankAccountNo: vendor.bankAccountNo,
       bankName: vendor.bankName,
+      addressLine1: vendor.addressLine1,
+      addressLine2: vendor.addressLine2,
+      city: vendor.city,
+      country: vendor.country,
+      zipCode: vendor.zipCode,
     });
   };
 
-  const handleSubmit = async () => {
-    console.log("Submitting Vendor ID:", editingVendor.vendorId);
+  const handleSubmit = async (vendor) => {
+    console.log("Submitting Vendor ID:", editingVendor._id);
     console.log("Edited Vendor Data:", editedVendor);
+
     try {
-      await axios.put(
-        `http://localhost:6005/editvendor/${editingVendor.vendorId}`,
-        editedVendor
+      const updatedData = {
+        vendorName: editedVendor.vendorName,
+        bankAccountNo: editedVendor.bankAccountNo,
+        bankName: editedVendor.bankName,
+        addressLine1: editedVendor.addressLine1,
+        addressLine2: editedVendor.addressLine2,
+        city: editedVendor.city,
+        country: editedVendor.country,
+        zipCode: editedVendor.zipCode,
+      };
+
+      const response = await axios.put(
+        `http://localhost:6005/editvendor/${editingVendor._id}`,
+        updatedData,
+        { headers: { "Content-Type": "application/json" } }
       );
 
+      console.log("Response from server:", response);
+
+      const updatedVendor = response.data.updatedVendor;
+
       const updatedVendors = vendors.map((vendor) =>
-        vendor.vendorId === editingVendor.vendorId
-          ? { ...vendor, ...editedVendor }
-          : vendor
+        vendor.vendorId === editingVendor.vendorId ? updatedVendor : vendor
       );
 
       setVendors(updatedVendors);
@@ -69,6 +96,55 @@ const VendorList = () => {
       setEditedVendor({});
     } catch (error) {
       console.error("Error updating vendor:", error);
+      if (error.response) {
+        console.error(
+          "Server responded with error status:",
+          error.response.status
+        );
+        console.error("Error response data:", error.response.data);
+      } else if (error.request) {
+        console.error("No response received from the server");
+      } else {
+        console.error("Error during request setup:", error.message);
+      }
+    }
+  };
+
+  //delete function
+  const handleDeleteClick = (vendor) => {
+    // Display a confirmation dialog
+    const isConfirmed = window.confirm(
+      `Are you sure you want to delete ${vendor.vendorName}?`
+    );
+
+    if (isConfirmed) {
+      // User confirmed, proceed with the delete operation
+      performDeleteOperation(vendor);
+    } else {
+      // User canceled, do nothing
+      console.log("Delete canceled by user");
+    }
+  };
+
+  const performDeleteOperation = async (vendor) => {
+    try {
+      // Send a delete request to the server
+      const response = await axios.delete(
+        `http://localhost:6005/deletevendor/${vendor._id}`
+      );
+
+      console.log("Response from server:", response);
+
+      // Filter out the deleted vendor from the state
+      const updatedVendors = vendors.filter(
+        (existingVendor) => existingVendor._id !== vendor._id
+      );
+
+      // Update the state
+      setVendors(updatedVendors);
+    } catch (error) {
+      console.error("Error deleting vendor:", error);
+      // Handle errors if necessary
     }
   };
 
@@ -98,8 +174,10 @@ const VendorList = () => {
         <p>
           <strong>Zip Code:</strong> {vendor.zipCode}
         </p>
-        {/* Ensure vendorId is available and passed correctly */}
+
         <button onClick={() => handleEditClick(vendor)}>Edit</button>
+
+        <button onClick={() => handleDeleteClick(vendor)}>Delete</button>
         <hr />
       </div>
     ));
@@ -156,6 +234,71 @@ const VendorList = () => {
               value={editedVendor.bankName || ""}
               onChange={(e) =>
                 setEditedVendor({ ...editedVendor, bankName: e.target.value })
+              }
+            />
+          </label>
+          <label>
+            addressLine1:
+            <input
+              type="text"
+              value={editedVendor.addressLine1 || ""}
+              onChange={(e) =>
+                setEditedVendor({
+                  ...editedVendor,
+                  addressLine1: e.target.value,
+                })
+              }
+            />
+          </label>
+          <label>
+            addressLine2:
+            <input
+              type="text"
+              value={editedVendor.addressLine2 || ""}
+              onChange={(e) =>
+                setEditedVendor({
+                  ...editedVendor,
+                  addressLine2: e.target.value,
+                })
+              }
+            />
+          </label>
+          <label>
+            city
+            <input
+              type="text"
+              value={editedVendor.city || ""}
+              onChange={(e) =>
+                setEditedVendor({
+                  ...editedVendor,
+                  city: e.target.value,
+                })
+              }
+            />
+          </label>
+          <label>
+            country
+            <input
+              type="text"
+              value={editedVendor.country || ""}
+              onChange={(e) =>
+                setEditedVendor({
+                  ...editedVendor,
+                  country: e.target.value,
+                })
+              }
+            />
+          </label>
+          <label>
+            zipCode
+            <input
+              type="text"
+              value={editedVendor.zipCode || ""}
+              onChange={(e) =>
+                setEditedVendor({
+                  ...editedVendor,
+                  zipCode: e.target.value,
+                })
               }
             />
           </label>
