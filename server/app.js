@@ -110,20 +110,16 @@ app.post("/dashboard", async (req, res) => {
   const vendorData = req.body;
 
   try {
-    // Create a new vendor document
     const newVendor = new vendordb(vendorData);
 
-    // Save the document to the database
     const savedVendor = await newVendor.save();
 
     console.log("Vendor details saved:", savedVendor);
 
-    // Respond to the client with a success message
     res.status(200).json({ message: "Vendor details saved successfully" });
   } catch (error) {
     console.error("Error saving vendor details:", error.message);
 
-    // Respond to the client with an error message
     res.status(500).json({ error: "Internal server error" });
   }
 });
@@ -151,7 +147,7 @@ app.get("/vendors", async (req, res) => {
     // Map _id to vendorId
     const vendorsWithVendorId = vendors.map((vendor) => ({
       ...vendor,
-      vendorId: String(vendor._id), // Convert _id to String and set it as vendorId
+      vendorId: String(vendor._id),
     }));
 
     res.json(vendorsWithVendorId);
@@ -191,7 +187,6 @@ app.delete("/deletevendor/:vendorId", async (req, res) => {
   try {
     const vendorId = req.params.vendorId;
 
-    // Use your mongoose model to delete the vendor
     const deletedVendor = await vendordb.findByIdAndDelete(vendorId);
 
     if (!deletedVendor) {

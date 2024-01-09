@@ -1,8 +1,8 @@
 import axios from "axios";
-import React, { useEffect } from "react";
-import { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./dashboard.css";
+
 const Dashboard = () => {
   const navigate = useNavigate();
   const [vendorData, setVendorData] = useState({
@@ -15,6 +15,8 @@ const Dashboard = () => {
     country: "",
     zipCode: "",
   });
+  const [submissionStatus, setSubmissionStatus] = useState(null);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setVendorData((prevData) => ({
@@ -31,15 +33,31 @@ const Dashboard = () => {
         withCredentials: true,
       });
 
-      console.log("Vendor details submitted successfully!");
+      // Update the submission status
+      setSubmissionStatus("Form submitted successfully!");
+
+      // Optionally, you can reset the form data
+      setVendorData({
+        vendorName: "",
+        bankAccountNo: "",
+        bankName: "",
+        addressLine1: "",
+        addressLine2: "",
+        city: "",
+        country: "",
+        zipCode: "",
+      });
     } catch (error) {
       console.error("Error submitting vendor details:", error);
+
+      // Update the submission status for error case
+      setSubmissionStatus("Error submitting the form. Please try again.");
     }
   };
 
   const getUser = async () => {
     try {
-      const response = await axios.get("http://localhost:6005/login/sucess", {
+      const response = await axios.get("http://localhost:6005/login/success", {
         withCredentials: true,
       });
 
@@ -52,6 +70,7 @@ const Dashboard = () => {
   useEffect(() => {
     getUser();
   }, [navigate]);
+
   return (
     <div style={{ textAlign: "center" }}>
       <h1>Dashboard</h1>
@@ -145,6 +164,8 @@ const Dashboard = () => {
 
         <button type="submit">Submit</button>
       </form>
+
+      {submissionStatus && <p>{submissionStatus}</p>}
     </div>
   );
 };
